@@ -5,10 +5,11 @@ import MainHeader from "@/components/Header";
 import ProductList from "@/components/ProductList";
 import { getProductByCategory, getProductCategory, getProducts } from "@/services/products";
 import { Product } from "@/types/type";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useFilterSort } from "./hooks/useFilterSort";
 import Pagination from "@/components/Pagination";
 import { usePagination } from "./hooks/usePagination";
+import ProductItemSkeleton from "@/components/skeletons/ProductItemSkeleton";
 
 const initialProducts = {
   products: [],
@@ -52,16 +53,18 @@ export default function Home() {
     queryFn: () => getProductCategory(),
   });
 
-  const { data: products = initialProducts } = useQuery({
+  const { data: products = initialProducts, isLoading: isProductsLoading } = useQuery({
     queryKey: ['products', selectedSort, skip],
     queryFn: () => getProducts(params),
-    enabled: selectedCategory === ''
+    enabled: selectedCategory === '',
+    placeholderData: keepPreviousData,
   });
 
-  const { data: productsByCategory = initialProducts } = useQuery({
+  const { data: productsByCategory = initialProducts, isLoading: isProductsByCategoryLoading } = useQuery({
     queryKey: ['productsByCategory', selectedCategory, selectedSort, skip],
     queryFn: () => getProductByCategory(selectedCategory, params),
     enabled: selectedCategory !== '',
+    placeholderData: keepPreviousData,
   });
 
   const handleChangeCategory = (category: string) => {
@@ -74,11 +77,11 @@ export default function Home() {
   return (
     <>
       <MainHeader>
-        <h1 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900">
+        <h1 className="mb-4 text-3xl font-bold tracking-tight text-slate-900">
           Explore Our<div className="text-blue-600">Featured Products</div>
         </h1>
       </MainHeader>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         <FilterBar
           categories={categories}
           selectedCategory={selectedCategory}
@@ -88,6 +91,7 @@ export default function Home() {
           onClearFilter={handleClearFilter}
           isFiltered={selectedCategory !== '' || selectedSort !== ''}
         />
+        {isProductsLoading || isProductsByCategoryLoading ? <RenderProductSkeleton /> : null}
         {displayProduct.map((product: Product) => (
           <ProductList
             key={product.id}
@@ -104,4 +108,15 @@ export default function Home() {
       </div>
     </>
   );
+}
+
+
+const RenderProductSkeleton = () => {
+  return (
+    <>
+      {[1, 2, 3, 4, 5].map(item => (
+        <ProductItemSkeleton key={item} />
+      ))}
+    </>
+  )
 }

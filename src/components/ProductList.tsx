@@ -15,7 +15,7 @@ export default function ProductList({
                 <div className="col-span-12 sm:col-span-3 flex justify-center items-center">
                     <Image
                         src={product.images[0]}
-                        className="h-28 w-auto object-contain"
+                        className="h-28 w-full object-contain bg-blue-50 rounded"
                         alt={`product-${product.id}-images`}
                         height={50}
                         width={50}

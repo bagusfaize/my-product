@@ -65,7 +65,7 @@ export default function FilterBar({
                 </div>
             </div>
             {isFiltered &&
-                <div className="col-span-12 sm:col-span-2">
+                <div className="col-span-12 sm:col-span-2 flex justify-end sm:justify-normal">
                     <button
                         onClick={onClearFilter}
                         className="flex gap-1 items-center px-3 py-2 text-sm font-medium text-center text-red-500 bg-white border border-slate-200 rounded-md"
