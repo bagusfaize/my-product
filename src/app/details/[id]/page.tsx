@@ -27,7 +27,7 @@ export default function ProductDetailsPage() {
     return (
         <div>
             <MainHeader>
-                <h1 className="mb-4 text-xl font-extrabold tracking-tight text-slate-900 lg:text-3xl">Product Details</h1>
+                <h1 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900">Product Details</h1>
             </MainHeader>
             <div className="border rounded-lg bg-white p-5">
                 <div className="flex gap-2 items-center mb-5">
