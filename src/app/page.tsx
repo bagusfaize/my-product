@@ -7,6 +7,15 @@ import { getProductByCategory, getProductCategory, getProducts } from "@/service
 import { Product } from "@/types/type";
 import { useQuery } from "@tanstack/react-query";
 import { useFilterSort } from "./hooks/useFilterSort";
+import Pagination from "@/components/Pagination";
+import { usePagination } from "./hooks/usePagination";
+
+const initialProducts = {
+  products: [],
+  limit: 5,
+  skip: 0,
+  total: 0
+}
 
 export default function Home() {
 
@@ -18,7 +27,20 @@ export default function Home() {
     handleClearFilter
   } = useFilterSort();
 
+  const {
+    limit,
+    skip,
+    currentPage,
+    handleNextPage,
+    handlePrevPage,
+    resetPagination,
+  } = usePagination();
+
+
   const params = new URLSearchParams();
+
+  params.append('limit', limit.toString());
+  params.append('skip', skip.toString());
 
   if (selectedSort) {
     params.append('sortBy', selectedSort.split('-')[0]);
@@ -30,19 +52,24 @@ export default function Home() {
     queryFn: () => getProductCategory(),
   });
 
-  const { data: products = [] } = useQuery({
-    queryKey: ['products', selectedSort],
+  const { data: products = initialProducts } = useQuery({
+    queryKey: ['products', selectedSort, skip],
     queryFn: () => getProducts(params),
     enabled: selectedCategory === ''
   });
 
-  const { data: productsByCategory = [] } = useQuery({
-    queryKey: ['productsByCategory', selectedCategory, selectedSort],
+  const { data: productsByCategory = initialProducts } = useQuery({
+    queryKey: ['productsByCategory', selectedCategory, selectedSort, skip],
     queryFn: () => getProductByCategory(selectedCategory, params),
     enabled: selectedCategory !== '',
   });
 
-  const displayProduct = selectedCategory !== '' ? productsByCategory : products;
+  const handleChangeCategory = (category: string) => {
+    setSelectedCategory(category);
+    resetPagination();
+  }
+
+  const displayProduct = selectedCategory !== '' ? productsByCategory.products : products.products;
 
   return (
     <>
@@ -56,7 +83,7 @@ export default function Home() {
           categories={categories}
           selectedCategory={selectedCategory}
           selectedSort={selectedSort}
-          onChangeCategory={setSelectedCategory}
+          onChangeCategory={handleChangeCategory}
           onChangeSort={handleChangeSort}
           onClearFilter={handleClearFilter}
           isFiltered={selectedCategory !== '' || selectedSort !== ''}
@@ -67,6 +94,13 @@ export default function Home() {
             product={product}
           />
         ))}
+        <Pagination
+          limit={limit}
+          currentPage={currentPage}
+          onPrev={handlePrevPage}
+          onNext={handleNextPage}
+          total={selectedCategory ? productsByCategory.total : products.total}
+        />
       </div>
     </>
   );
